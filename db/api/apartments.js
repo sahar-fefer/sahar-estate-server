@@ -18,7 +18,9 @@ function getApartments({ id, sale_status, city_id, min_price, max_price, propert
                 .min_rooms(min_rooms)
                 .max_rooms(max_rooms)
                 .build();
+
             console.log(query, params);
+            
             connection.query(query, params, (error, results, fields) => {
                 if (error) {
                     reject(error);

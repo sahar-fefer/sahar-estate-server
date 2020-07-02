@@ -3,7 +3,7 @@ const connection = require('../config');
 const validate = require('../api/validations/apartment');
 const Builder = require('./builders/apartments');
 
-function getApartments({ id, sale_status, city_id, min_price, max_price, property_type, min_baths, max_baths, min_rooms, max_rooms, page = 1, size = 12 }) {
+function getApartments({ id, sale_status, city_id, min_price, max_price, property_type, min_baths, max_baths, min_rooms, max_rooms, page = 1, size = 6 }) {
     return new Promise((resolve, reject) => {
         try {
             const { query, params } = Builder.allApartments(page, size)
@@ -19,7 +19,8 @@ function getApartments({ id, sale_status, city_id, min_price, max_price, propert
                 .max_rooms(max_rooms)
                 .build();
 
-            console.log(query, params);
+            console.log('params', params);
+            console.log('query', query);
             
             connection.query(query, params, (error, results, fields) => {
                 if (error) {
@@ -43,6 +44,38 @@ function getApartmentImages(apartment_id) {
                     return;
                 }
                 resolve(results);
+            });
+        } catch (e) {
+            console.log(e);
+        }
+    });
+}
+
+function getRentApartments() {
+    return new Promise((resolve, reject) => {
+        try {
+            connection.query(`SELECT COUNT(*) as rent FROM apartments where ${`status`} = 'approved' and ${`availability`} = 'available' and ${`sale_status`} = 'rent';`, (error, results, fields) => {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(results[0].rent);
+            });
+        } catch (e) {
+            console.log(e);
+        }
+    });
+}
+
+function getSaleApartments() {
+    return new Promise((resolve, reject) => {
+        try {
+            connection.query(`SELECT COUNT(*) as sale FROM apartments where ${`status`} = 'approved' and ${`availability`} = 'available' and ${`sale_status`} = 'sale';`, (error, results, fields) => {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(results[0].sale);
             });
         } catch (e) {
             console.log(e);
@@ -129,6 +162,8 @@ function addApartment({ address, price, number_of_room, number_of_bath, sqft, de
 function updateApartmentStatus(newStatus, apartment_id) {
     return new Promise((resolve, reject) => {
         try {
+            console.log('newStatus', newStatus);
+            console.log('apartment_id', apartment_id);
             connection.query('UPDATE apartments SET status = ? WHERE id = ?', [newStatus, apartment_id], (error, results, fields) => {
                 if (error) {
                     reject(error);
@@ -142,7 +177,7 @@ function updateApartmentStatus(newStatus, apartment_id) {
     });
 }
 
-function availabilityApartment(availability, apartment_id) {
+function updateAvailabilityApartment(availability, apartment_id) {
     return new Promise((resolve, reject) => {
         try {
             connection.query('UPDATE apartments SET availability = ? WHERE id = ?', [availability, apartment_id], (error, results, fields) => {
@@ -173,11 +208,13 @@ function availabilityApartment(availability, apartment_id) {
 module.exports = {
     getApartments,
     getApartmentImages,
+    getRentApartments,
+    getSaleApartments,
     getApartmentsUser,
     getApartmentsUserByStatus,
     addApartment,
     updateApartmentStatus,
-    availabilityApartment,
+    updateAvailabilityApartment,
     // editApartment,
     // allCitiesOfApartments
 };

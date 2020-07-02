@@ -36,6 +36,16 @@ router.get('/:apartment_id/images', async function (req, res, next) {
   }
 });
 
+router.get('/rent_or_sale', async function (req, res, next) {
+  try {
+    const rent = await api.getRentApartments();
+    const sale = await api.getSaleApartments();
+    res.status(200).json({rent, sale});
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.get('/:user_id', async function (req, res, next) {
   try {
     const apartments = await api.getApartmentsUser(+req.params.user_id);
@@ -87,13 +97,22 @@ router.post('/', upload.single('main_image'), async function (req, res, next) {
 // //     }
 // // });
 
-router.put('/:apartment_id/:availability', async function (req, res, next) {
+router.put('/:apartment_id/:availability/availability', async function (req, res, next) {
     try {
-        const apartment = await api.availabilityApartment(req.params.availability, req.params.apartment_id)
+        const apartment = await api.updateAvailabilityApartment(req.params.availability, req.params.apartment_id)
         res.status(200).json(apartment);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+});
+
+router.put('/:apartment_id/:status/status', async function (req, res, next) {
+  try {
+      const apartment = await api.updateApartmentStatus(req.params.status, req.params.apartment_id)
+      res.status(200).json(apartment);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
 });
 
 module.exports = router;

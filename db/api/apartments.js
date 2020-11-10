@@ -21,7 +21,7 @@ function getApartments({ id, sale_status, city_id, min_price, max_price, propert
 
             console.log('params', params);
             console.log('query', query);
-            
+
             connection.query(query, params, (error, results, fields) => {
                 if (error) {
                     reject(error);
@@ -115,18 +115,18 @@ function getApartmentsUserByStatus(user_id, status) {
     });
 }
 
-function addApartment({ address, price, number_of_room, number_of_bath, sqft, description, sale_status, property_type, main_image }) {
+function addApartment({ user_id, city_id, address, price, number_of_rooms, number_of_baths, sqft, description, sale_status, property_type, main_image }) {
     return new Promise((resolve, reject) => {
         try {
             const createApartment = {
-                user_id: 4,
-                city_id: 1102076,
+                user_id,
+                city_id,
                 address,
                 price,
-                number_of_room,
-                number_of_bath,
+                number_of_rooms,
+                number_of_baths,
                 sqft,
-                created_on: new Date(),
+                created_in: new Date(),
                 description,
                 sale_status,
                 availability: "available",
@@ -143,10 +143,22 @@ function addApartment({ address, price, number_of_room, number_of_bath, sqft, de
             //     reject(validationErrors);
             //     return;
             // }
+            
+            console.log('user_id', user_id)
+            console.log('city_id', city_id)
+            console.log('address', address)
+            console.log('price', price)
+            console.log('number_of_rooms', number_of_rooms)
+            console.log('number_of_baths', number_of_baths)
+            console.log('sqft', sqft)
+            console.log('description', description)
+            console.log('sale_status', sale_status)
+            console.log('property_type', property_type)
+            console.log('main_image', main_image)
 
             connection.query('INSERT INTO apartments SET ?', createApartment, (error, results, fields) => {
                 if (error) {
-                    // console.log('insert error', error);
+                    console.log('insert error', error);
                     reject(error);
                     return;
                 }

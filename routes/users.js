@@ -32,18 +32,35 @@ router.get('/:userId/apartments', async function (req, res, next) {
   }
 });
 
+router.get('/:userId/password', async function (req, res, next) {
+  try {
+    let password = await api.userPassword(req.params.userId);
+    console.log('password 1', password);
+    const token = crypto.pbkdf2Sync(password, 'realtorּ', 100000, 64, 'sha512');
+    console.log('token', token);
+    password = token.toString('base64');
+    
+    console.log('password 2', password);
+    res.status(200).json(password);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// {
+//   "email": "sahar@fefer.com",
+//   "password": "EHhNveOECD2rlL2/oNeFLtl19pm3qkcyFTG4YY/jLuV3Xa5jNAJyoOLy6mY8tD3WQHZcV0yOuwCp4mbLvYkIEg=="
+// }
 
 router.post('/login', async function (req, res, next) {
   try {
     const { email, password } = req.body;
-    console.log('password', password);
     const token = crypto.pbkdf2Sync(password, 'realtorּ', 100000, 64, 'sha512');
     const userPasswordHashed = token.toString('base64');
-    console.log('userPasswordHashed', userPasswordHashed);
     const user = await api.logIn(email, userPasswordHashed);
-    // const user = await api.logIn(email, user);
+    const userDitails = {id: user.id, first_name: user.first_name};
     if (user) {
-      res.cookie('auth', JSON.stringify(user), { maxAge: 1000 * 60 * 60 * 24 * 7 });
+      res.cookie('auth', JSON.stringify(userDitails), { maxAge: 1000 * 60 * 60 * 24 * 7 });
     }
     res.status(200).json(user);
   } catch (error) {
@@ -53,6 +70,10 @@ router.post('/login', async function (req, res, next) {
 
 router.post('/', async function (req, res, next) {
   try {
+    const token = crypto.pbkdf2Sync(req.body.password, 'realtorּ', 100000, 64, 'sha512');
+    const password = token.toString('base64');
+    req.body.password = password;
+    console.log('req.body', req.body);
     const userId = await api.addUser(req.body);
     res.status(201).json(userId);
   } catch (error) {

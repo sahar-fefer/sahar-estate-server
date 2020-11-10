@@ -1,6 +1,6 @@
 const connection = require('../config');
 
-const validate = require('../api/validations/user');
+// const validate = require('../api/validations/user');
 const Builder = require('./builders/users');
 
 function allUsers() {
@@ -69,7 +69,23 @@ function apartmentsOfUser(userId) {
     });
 }
 
-function addUser({ first_name, last_name, email, password, phone }) {
+function userPassword(userId) {
+    return new Promise((resolve, reject) => {
+        try {
+            connection.query('SELECT password FROM users WHERE id = ?', [userId], (error, results, fields) => {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(results);
+            });
+        } catch (e) {
+            console.log(e);
+        }
+    });
+}
+
+function addUser({ role_id, first_name, last_name, email, password }) {
     return new Promise((resolve, reject) => {
         try {
             //TODO: Validations
@@ -78,11 +94,10 @@ function addUser({ first_name, last_name, email, password, phone }) {
                 last_name,
                 email,
                 password,
-                phone,
-                role_id: 2
+                role_id
             };
 
-            const result = validate(createUser);
+            // const result = validate(createUser);
             // console.log(result);
 
             connection.query('INSERT INTO users SET ?', createUser, (error, results, fields) => {
@@ -129,6 +144,7 @@ module.exports = {
     byId,
     logIn,
     apartmentsOfUser,
+    userPassword,
     addUser,
     editUser
 };
